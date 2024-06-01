@@ -1,11 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    Ola
-</body>
+  </head>
+  <body>
+    <h1 id="currentPath">Current Path: /</h1>
+    <h3>
+      <ul id="files-and-dirs">
+        <li id="current" class="link">
+          .
+        </li>
+        <li id="back" class="link">
+          ..
+        </li>
+        
+      </ul>
+    </h3>
+    <script>
+      const getCurrentPath = () => {
+        const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        const currentPath = url.pathname;
+        return currentPath;
+      };
+      const setCurrentFilePath = () => {
+        const currentPath = getCurrentPath();
+        document.getElementById("currentPath").innerText = `Current Path: ${currentPath}`;
+      };
+
+      const readCurrentFilesAndDirs = () => {
+        const currentPath = getCurrentPath();
+        const response = fetch(`http://localhost:3000${currentPath}`);
+        console.log(response);
+        return response;
+      };
+
+      setCurrentFilePath();
+    </script>
+  </body>
 </html>

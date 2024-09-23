@@ -9,13 +9,8 @@
     <h1 id="currentPath">Current Path: /</h1>
     <h3>
       <ul id="files-and-dirs">
-        <li id="current" class="link">
-          .
-        </li>
-        <li id="back" class="link">
-          ..
-        </li>
-        
+        <li id="current" class="link">.</li>
+        <li id="back" class="link">..</li>
       </ul>
     </h3>
     <script>
@@ -25,19 +20,34 @@
         const currentPath = url.pathname;
         return currentPath;
       };
+
       const setCurrentFilePath = () => {
         const currentPath = getCurrentPath();
-        document.getElementById("currentPath").innerText = `Current Path: ${currentPath}`;
+        document.querySelector(
+          "#currentPath"
+        ).innerText = `Current Path: ${currentPath}`;
       };
 
       const readCurrentFilesAndDirs = () => {
         const currentPath = getCurrentPath();
-        const response = fetch(`http://localhost:3000${currentPath}`);
-        console.log(response);
-        return response;
+        const targetUrl = `http://localhost:3000${currentPath}`;
+        console.log({ targetUrl });
+        const response = fetch(`http://localhost:3000${currentPath}`)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log({ data });
+            data.files.forEach((item) => {
+              const li = document.createElement("li");
+              li.classList.add("link");
+              li.id = item;
+              li.innerText = item;
+              document.querySelector("#files-and-dirs").appendChild(li);
+            });
+          });
       };
 
       setCurrentFilePath();
+      readCurrentFilesAndDirs();
     </script>
   </body>
 </html>

@@ -1,13 +1,28 @@
 const { createServer } = require("node:http");
 const fs = require("fs");
-const path = require('node:path'); 
+const path = require("node:path");
 
 const hostname = "127.0.0.1";
 
 const port = 3000;
 
-
-const isFile = fileName => fs.lstatSync(fileName).isFile();
+const isFile = (fileName, cb) => {
+  fs.lstat(fileName, (err, stats) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    if (stats.isFile()) {
+      console.log("File");
+      cb(true);
+    } else if (stats.isDirectory()) {
+      console.log("Directory");
+      cb(false);
+    } else {
+      console.log("Something else");
+    }
+  });
+};
 
 const server = createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -16,7 +31,6 @@ const server = createServer((req, res) => {
     "GET, POST, PUT, DELETE, OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
 
   if (req.method === "OPTIONS") {
     res.writeHead(204);
@@ -37,30 +51,28 @@ const server = createServer((req, res) => {
       res.end();
     });
     return;
-  }
-  else {
-    if(isFile(requestPath)){
-      fs.readdirSync(folderPath)
-        .map(fileName => {
-          return path.join(folderPath, fileName);
+  } else {
+    console.log({ requestPath });
+    isFile(requestPath, (isFile, err) => {
+      if (isFile) {
+        res.write(
+          JSON.stringify({
+            files: [],
+            folders: [],
         })
-        .filter(isFile);
-      return;
-    }
-
-    fs.readFile(`./${requestPath}`, function (err, html) {
-      if (err) {
-        res.writeHead(404, { "Content-Type": "text/plain" });
-        res.end("Path not found");
-        return;
+      );
+        res.end();
+      } else {
+        const folders = fs
+          .readdirSync(requestPath)
+          .map((fileName) => {
+            return path.join(requestPath, fileName);
+          })
+          .filter(isFile);
+        console.log({ folders });
       }
-      
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.write(html);
-      res.end();
     });
   }
-
 });
 
 server.listen(port, hostname, () => {
